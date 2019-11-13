@@ -9,10 +9,10 @@ This is a software to study degenerate and non-degenerate spherical dark matter 
 	$ python main.py
 	
 The software can also be used online at    
-https://mybinder.org/v2/gh/ahmadborzou/Study_DM_in_Galaxies/master 
+https://mybinder.org/v2/gh/ahmadborzou/Study_DM_in_Galaxies-master.git/master
 
 here is a short tutorial   
-https://youtu.be/m-HqiTLKfOA
+https://youtu.be/j4G_38baj_w
 
 
 
