@@ -85,9 +85,9 @@ class profile:
 			return self.z0*np.exp(lns)
 		else:
 			## partial degeneracy. Numerically solve the integral
-			#return f_nu(5./2.,self.z0*np.exp(lns))
+			return f_nu(5./2.,self.z0*np.exp(lns))
 			## use the pickled values. z increments are 0.1
-			return f52_arr[int(self.z0*np.exp(lns)/0.1)-1]
+			#return f52_arr[int(self.z0*np.exp(lns)/0.1)-1]
 			
 	## Dirac-Fermi function f_3/2
 	def f_32(self,lns):
@@ -96,8 +96,8 @@ class profile:
 		elif self.z0*np.exp(lns) < 0.1:
 			return self.z0*np.exp(lns)
 		else:
-			#return f_nu(3./2.,self.z0*np.exp(lns))
-			return f32_arr[int(self.z0*np.exp(lns)/0.1)-1]
+			return f_nu(3./2.,self.z0*np.exp(lns))
+			#return f32_arr[int(self.z0*np.exp(lns)/0.1)-1]
 						
 	## Dirac-Fermi function f_1/2
 	def f_12(self,lns):
@@ -106,8 +106,8 @@ class profile:
 		elif self.z0*np.exp(lns) < 0.1:
 			return self.z0*np.exp(lns)
 		else:
-			#return f_nu(1./2.,self.z0*np.exp(lns))		
-			return f12_arr[int(self.z0*np.exp(lns)/0.1)-1]
+			return f_nu(1./2.,self.z0*np.exp(lns))		
+			#return f12_arr[int(self.z0*np.exp(lns)/0.1)-1]
 		
 	## the second derivative of Ln(s) (s = z/z0)
 	def lnspp(self,lnsp,lns,ypp,yp,y,xi):
