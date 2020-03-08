@@ -62,7 +62,7 @@ def SolveStability():
 	
 	
 	## stop the loop when density is 1/1000 of the initial value
-	while gal.n(lns,y) > 0.001*gal.n0:
+	while gal.n(lns,y) > 1.e-6*gal.n0:
 		## second derivative of y and Ln(s)
 		y_pp   = ins.y_pp(xi)
 		lns_pp = gal.lnspp(lns_p,lns,y_pp,y_p,y,xi)
