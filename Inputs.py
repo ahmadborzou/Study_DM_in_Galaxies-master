@@ -7,7 +7,7 @@ affiliation: Baylor University
 
 import Constants as co
 import numpy as np
-import sympy as sp
+
 
 
 ###########################
