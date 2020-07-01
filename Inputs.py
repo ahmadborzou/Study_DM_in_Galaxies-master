@@ -6,71 +6,47 @@ affiliation: Baylor University
 """
 
 import Constants as co
-########################################################################
-## Set the initial values 
-## m = mass
-## n0 = number density at r=0
-## T0 = temperature at r=0
-## a, b are used to set the temperature profile as d^y/d(xi)^2 = -a xi^b
-########################################################################
+import numpy as np
+import sympy as sp
 
-##############
-## In SI units 
-##############
+
+###########################
+## Everythin in SI units ##
+###########################
 
 
 
 
-################################
-## Dwarfs with DM mass of 200 eV
-#m  = co.m*200.
-#n0 = 1.e-20/m 
-#T0 = 0.0001
-#n0 = 1.e-21/m 
-#T0 = 0.000003
-#a  = 0. 
-#b  = 0.
-##-------
-#a  = 10.
-#b  = 0.
+##################################################################################
+## m: the mass of Dark matter   ## co.m = 1 eV in SI units
+## n0: the number density of dark matter
+## T0: the temperature at the center
+## n and b: parameters of temperature profile in the form of y = (1 + b \xi^n)^{-1} with n > 1. ## set b=0 for isothermal 
+##################################################################################
+m  = co.m*100.
+n0 = 1.e-22/m 
+T0 = 0.1
+n = 2.	
+b = 100.
 
 
-
-##############################
-## Dwarfs with DM mass of 2 eV
-m  = co.m*2.
-n0 = co.rho0/m*1.3
-T0 = 0.001
-a  = 2.2e6
-b  = 0.
-##-------
-#a  = 0.
-#b  = 0.
-
-
-############################
-## classic isothermal galaxy
-#m  = co.m*1.e6
-#n0 = 8.e-20/m #co.rho0/m 
-#T0 = 1300.
-#a  = 0.
-#b  = 0.
-
-
-#############
-#m  = co.m*2.
-#n0 = co.rho0/m*1.3
-#T0 = 1.e-3
-#a  = ?
-#b  = ?
-#y_pp = lambda xi, a, b: a*(b + xi)**(-2)
-
-
-###################################
-## second derivative of T/T0 wrt xi
-## d^2(y)/d(xi)^2 
-def y_pp(xi,a=a,b=b):
-	#return <whatever other form of the temperature profile>
-	return -a*xi**b
+##################################################################################
+## the temperature profile and its first and second derivative with respect to \xi
+##################################################################################
+def y(xi):
+	return 1/(1 + b*xi**n)
 	
+def y_p(xi):
+	return -(b*n*xi**(-1 + n))/(1 + b*xi**n)**2
+
+def y_pp(xi):
+	return  (b*n*xi**(-2 + n)*(1 + b*xi**n + n*(-1 + b*xi**n)))/(1 + b*xi**n)**3
+
+## make sure that the temperature profile has correct initial conditions
+if abs(y(0)-1.)>1.e-5 or abs(y_p(0))>1.e-5:
+	print("y0: %g yp0: %g"%(y(0),y_p(0)))
+	raise(Exception("Wrong temperature profile. Initial values have to be y=0, y_p=0."))
+##################################################################################
+##################################################################################
+
 

@@ -6,11 +6,14 @@ email      : ahmad_borzou[at]baylor.edu
 affiliation: Baylor University
 """
 
+import numpy as np
+from numpy import sqrt, sin, cos, pi,power
+from scipy.integrate import quad
 
-########################
-## constants in SI units
-########################
 
+###########
+## constants
+###########
 # mass of the sun
 MSun = 1.99e30 # in kg
 # one parce
@@ -27,5 +30,5 @@ h = 6.6e-34
 k = 1.4e-23
 #Newton constant
 G = 6.7e-11
-# 1 eV
+# neutrino mass
 m = 1.8e-36

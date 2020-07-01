@@ -1,6 +1,6 @@
 # Study DM in Galaxies
  
-This is a software to study degenerate and non-degenerate spherical dark matter halos of galaxies with any temperature profile.
+This is a software to study spherical dark matter halos of galaxies with any temperature profile at any degeneracy level.
 
 ## How to run the software:
 
@@ -19,7 +19,7 @@ https://youtu.be/j4G_38baj_w
 
 
 ## Here is the architecture of the software:
-The software is written in python 2.7 and depends on numpy 1.16.2, scipy 1.2.1, and matplotlib 2.2.4.
+The software is written in python 3.7 and depends on numpy 1.17.3, scipy 1.3.1, and matplotlib 3.1.1.
 
 	1. main.py:
 	----------
@@ -42,16 +42,15 @@ The software is written in python 2.7 and depends on numpy 1.16.2, scipy 1.2.1, 
 	4. Fermi_Dirac_Integral.py:
 	--------------------------
 	The full definition of the Fermi-Dirac integrals are defined here. The integrals can be calculated numerically. 
-	The values of these integrals are computed and stored(pickled) in tables. In the run time the tables are used instead 
-	of the functions of this file. This optimizes the speed of the program. When fugacity is less than 0.1 or larger than 
-	exp(10), the approximations of the integrals are known and this exact forms will not be used. 
+	To find the degeneracy level z from the integrals, we solve an optimization problem. 
+    When fugacity is less than 0.01 or larger than exp(30), the approximations of the integrals are known and this exact forms will not be used. 
 	
 	5. Inputs.py:
 	------------
-	This is the file to be modified by User befor running the code. The user needs comment the default values and insert his/her
+	This is the file to be modified by User before running the code. The user needs to comment the default values and insert his/her
 	DM mass, number density at the center, and temperature at the center. The inputs are all in the SI units. 
-	Also \frac{d^y}{d\xi^2} is taken in this file. The default form is -a*\xi^b. If the user would like to work with this form, 
-	the values of a and b should be given. If other forms of temperature profile are desired, the return of function y_pp() 
+	Also the temperature profile, and its first and second derivatives are taken in this file. The default form is y=(1+b\xi^n)^{-1} with n>1. If the user would like to work with this form, 
+	the values of n and b should be set only. If other forms of temperature profile are desired, the return of functions 
 	should be overwritten
 	
 	6. Constants.py:

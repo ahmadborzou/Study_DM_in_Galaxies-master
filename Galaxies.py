@@ -12,9 +12,9 @@ from scipy.optimize import root_scalar
 
 
 ## for partial degeneracy use the pickled files
-import cPickle as pickle
-with open("FermiDirac.pickle", "rb") as fil:
-	z_arr,f52_arr,f32_arr,f12_arr = pickle.load(fil)
+#import cPickle as pickle
+#with open("FermiDirac.pickle", "rb") as fil:
+#	z_arr,f52_arr,f32_arr,f12_arr = pickle.load(fil)
 
 class profile:
 	## a constructor
@@ -32,7 +32,7 @@ class profile:
 		## using the EOS
 		f320 = self.n0*self.alpha**3/(2.*(co.k*self.T0)**(3./2.))
 		## if z << 1, all Fermi-Dirac integrals are equal to z
-		if f320 < 0.1:
+		if f320 < 0.01:
 			self.z0 = f320
 			self.lnz0 = np.log(self.z0)
 		else:
@@ -40,7 +40,7 @@ class profile:
 			## assume that it is high degenerate. Use Sommerfeld approximation and EOS
 			temp_lnz0 = (3.*np.sqrt(np.pi)*self.n0*self.alpha**3/(8.*(co.k*self.T0)**(3./2.)))**(2./3.)
 			## test the assumption
-			if temp_lnz0 > 10.:
+			if temp_lnz0 > 30.:
 				self.lnz0 = temp_lnz0
 				self.z0   = np.exp(self.lnz0) 
 			else:
@@ -78,57 +78,54 @@ class profile:
 	## Dirac-Fermi function f_5/2
 	def f_52(self,lns):
 		## High degeneracy
-		if self.lnz(lns) > 10:
+		if self.lnz(lns) > 30:
 			return 8./(15.*np.sqrt(np.pi))*(self.lnz(lns))**(5./2.)
 		## classical
-		elif self.z0*np.exp(lns) < 0.1:
+		elif self.z0*np.exp(lns) < 0.01:
 			return self.z0*np.exp(lns)
 		else:
 			## partial degeneracy. Numerically solve the integral
 			return f_nu(5./2.,self.z0*np.exp(lns))
-			## use the pickled values. z increments are 0.1
-			#return f52_arr[int(self.z0*np.exp(lns)/0.1)-1]
+
 			
 	## Dirac-Fermi function f_3/2
 	def f_32(self,lns):
-		if self.lnz(lns) > 10:
+		if self.lnz(lns) > 30:
 			return 4./(3.*np.sqrt(np.pi))*(self.lnz(lns))**(3./2.)
-		elif self.z0*np.exp(lns) < 0.1:
+		elif self.z0*np.exp(lns) < 0.01:
 			return self.z0*np.exp(lns)
 		else:
 			return f_nu(3./2.,self.z0*np.exp(lns))
-			#return f32_arr[int(self.z0*np.exp(lns)/0.1)-1]
+
 						
 	## Dirac-Fermi function f_1/2
 	def f_12(self,lns):
-		if self.lnz(lns) > 10:
+		if self.lnz(lns) > 30:
 			return 2./np.sqrt(np.pi)*(self.lnz(lns))**(1./2.)
-		elif self.z0*np.exp(lns) < 0.1:
+		elif self.z0*np.exp(lns) < 0.01:
 			return self.z0*np.exp(lns)
 		else:
 			return f_nu(1./2.,self.z0*np.exp(lns))		
-			#return f12_arr[int(self.z0*np.exp(lns)/0.1)-1]
+
 		
-	## the second derivative of Ln(s) (s = z/z0)
+	## the second derivative of s (= z/z0)
 	def lnspp(self,lnsp,lns,ypp,yp,y,xi):
 		## high degeneracy
-		if self.lnz(lns) > 10:
-			## this is f52/f32
+		if self.lnz(lns) > 30:
 			h  = self.f_52(lns)/self.f_32(lns)
 			hp = lnsp*(1. - self.f_52(lns)*self.f_12(lns)/(self.f_32(lns))**2)			
 		## classic case
-		elif self.z0*np.exp(lns) < 0.1:
-			## this is f52/f32
+		elif self.z0*np.exp(lns) < 0.01:
+			## this f52/f32
 			h  = 1.
 			## its derivative
 			hp = 0.
 		## partial degeneracy
 		else:
-			## this is f52/f32
 			h  = self.f_52(lns)/self.f_32(lns)
 			hp = lnsp*(1. - self.f_52(lns)*self.f_12(lns)/(self.f_32(lns))**2)
-		## at xi ~ 0 sp, and yp are closer to 0 than xi.
-		if self.r(xi) < co.parsec*0.0001:
+		## at xi ~ 0 sp, and yp are closer to 0 than xi.		
+		if False:#self.r(xi) < co.parsec:
 			return -np.sqrt(y)*self.f_32(lns) - yp*lnsp/y             - 5.*h*ypp/(2.*y) - 5.*hp*yp/(2.*y) 
 		else:
 			## write sp^2/s as sp/s*sp to avoid overflow
@@ -150,4 +147,30 @@ class profile:
 	## pressure
 	def P(self,lns,y):
 		return 2.*(co.k*self.T0*y)**(5./2.)/self.alpha**3*self.f_52(lns)
+		
+
+	## the second derivative of y (= T/T0)
+	def ypp(self,lnspp,lnsp,lns,yp,y,xi):
+		## high degeneracy
+		if self.lnz(lns) > 30:
+			h  = self.f_52(lns)/self.f_32(lns)
+			hp = lnsp*(1. - self.f_52(lns)*self.f_12(lns)/(self.f_32(lns))**2)			
+		## classic case
+		elif self.z0*np.exp(lns) < 0.01:
+			## this f52/f32
+			h  = 1.
+			## its derivative
+			hp = 0.
+		## partial degeneracy
+		else:
+			h  = self.f_52(lns)/self.f_32(lns)
+			hp = lnsp*(1. - self.f_52(lns)*self.f_12(lns)/(self.f_32(lns))**2)
+
+		## write sp^2/s as sp/s*sp to avoid overflow
+		return  -2./5.*y**1.5/h*self.f_32(lns) -2./5.*yp/h*lnsp -4./(5.*xi)*y/h*lnsp -2./5.*y/h*lnspp - hp/h*yp -2./xi*yp
+		
+		
+		
+		
+		
 		
