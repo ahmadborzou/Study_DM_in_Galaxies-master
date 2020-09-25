@@ -7,14 +7,29 @@ affiliation: Baylor University
 
 import numpy as np
 import Constants as co
-from Fermi_Dirac_Integral import f as f_nu
 from scipy.optimize import root_scalar
 
-
+## partial degeneracy
+from Fermi_Dirac_Integral import f as f_true
 ## for partial degeneracy use the pickled files
-#import cPickle as pickle
-#with open("FermiDirac.pickle", "rb") as fil:
-#	z_arr,f52_arr,f32_arr,f12_arr = pickle.load(fil)
+import pickle
+with open("FermiDirac.pickle", "rb") as fil:
+	z_arr,f52_arr,f32_arr,f12_arr = pickle.load(fil)
+
+## convert discrete Fermi-Dirac arrays to continous functions
+from scipy import interpolate
+f52_inter = interpolate.interp1d(z_arr,f52_arr,fill_value="extrapolate")
+f32_inter = interpolate.interp1d(z_arr,f32_arr,fill_value="extrapolate")
+f12_inter = interpolate.interp1d(z_arr,f12_arr,fill_value="extrapolate")
+def f_nu(nu,z):
+	if abs(nu-5./2.)<1.e-6:
+		return f52_inter(z)
+	elif abs(nu-3./2.)<1.e-6:
+		return f32_inter(z)
+	elif abs(nu-1./2.)<1.e-6:
+		return f12_inter(z)
+	else:
+		return -99.
 
 class profile:
 	## a constructor
@@ -48,10 +63,10 @@ class profile:
 				## this is the slowest part because no perturbation exist to be used
 				## z0 is the root of this function
 				def RootFunc(z):
-					return f_nu(3./2.,z)-f320
+					return f_true(3./2.,z)-f320
 				## derivative of this function wrt z
 				def RootFuncPrime(z):
-					return f_nu(1./2.,z)/z
+					return f_true(1./2.,z)/z
 				## do the optimization to find z0
 				ans = root_scalar(f=RootFunc,method='newton',fprime=RootFuncPrime,x0=1.)
 				## make sure that it converged
@@ -78,8 +93,10 @@ class profile:
 	## Dirac-Fermi function f_5/2
 	def f_52(self,lns):
 		## High degeneracy
-		if self.lnz(lns) > 30:
+		if self.lnz(lns) > 30.:
 			return 8./(15.*np.sqrt(np.pi))*(self.lnz(lns))**(5./2.)
+		elif self.lnz(lns) > 10.:
+			return f_true(5./2.,self.z0*np.exp(lns))
 		## classical
 		elif self.z0*np.exp(lns) < 0.01:
 			return self.z0*np.exp(lns)
@@ -90,8 +107,10 @@ class profile:
 			
 	## Dirac-Fermi function f_3/2
 	def f_32(self,lns):
-		if self.lnz(lns) > 30:
+		if self.lnz(lns) > 30.:
 			return 4./(3.*np.sqrt(np.pi))*(self.lnz(lns))**(3./2.)
+		elif self.lnz(lns) > 10.:
+			return f_true(3./2.,self.z0*np.exp(lns))
 		elif self.z0*np.exp(lns) < 0.01:
 			return self.z0*np.exp(lns)
 		else:
@@ -100,8 +119,10 @@ class profile:
 						
 	## Dirac-Fermi function f_1/2
 	def f_12(self,lns):
-		if self.lnz(lns) > 30:
+		if self.lnz(lns) > 30.:
 			return 2./np.sqrt(np.pi)*(self.lnz(lns))**(1./2.)
+		elif self.lnz(lns) > 10.:
+			return f_true(1./2.,self.z0*np.exp(lns))
 		elif self.z0*np.exp(lns) < 0.01:
 			return self.z0*np.exp(lns)
 		else:
@@ -111,7 +132,7 @@ class profile:
 	## the second derivative of s (= z/z0)
 	def lnspp(self,lnsp,lns,ypp,yp,y,xi):
 		## high degeneracy
-		if self.lnz(lns) > 30:
+		if self.lnz(lns) > 10.:
 			h  = self.f_52(lns)/self.f_32(lns)
 			hp = lnsp*(1. - self.f_52(lns)*self.f_12(lns)/(self.f_32(lns))**2)			
 		## classic case
@@ -152,7 +173,7 @@ class profile:
 	## the second derivative of y (= T/T0)
 	def ypp(self,lnspp,lnsp,lns,yp,y,xi):
 		## high degeneracy
-		if self.lnz(lns) > 30:
+		if self.lnz(lns) > 10.:
 			h  = self.f_52(lns)/self.f_32(lns)
 			hp = lnsp*(1. - self.f_52(lns)*self.f_12(lns)/(self.f_32(lns))**2)			
 		## classic case

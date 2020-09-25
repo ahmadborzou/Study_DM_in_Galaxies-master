@@ -34,7 +34,11 @@ def SolveStability():
 	N = 0
 	## mass of galaxy 
 	M = 0.
-		
+	## for free falling speed
+	v02_vr2 = 0.
+	## To calculate the Gravitational Potential energy
+	temphi = 0.
+	
 	## containers to store the outputs
 	xi_arr     = []
 	r_arr      = []
@@ -48,7 +52,8 @@ def SolveStability():
 	rhop_arr   = []
 	P_arr      = []
 	M_arr      = []
-
+	v02_vr2_arr  = []
+	temphi_arr   = []
 	
 	## append the initial values
 	xi_arr.append(xi)
@@ -63,12 +68,13 @@ def SolveStability():
 	rhop_arr.append(gal.m*gal.n_p(lns_p,lns,y_p,y))
 	P_arr.append(gal.P(lns,y))
 	M_arr.append(M)	
-	
+	v02_vr2_arr.append(v02_vr2)
+	temphi_arr.append(temphi)	
+
 	
 	## stop the loop when density is 1/1000 of the initial value
 	while gal.n(lns,y) > 1.e-3*gal.n0:
-		#if gal.r(xi)/(1000.*co.parsec) < 0.04:
-		#	dxi = gal.xi(co.parsec*0.001)
+
 		## second derivative of y and s
 		y_pp   = ins.y_pp(xi)
 		lns_pp = gal.lnspp(lns_p,lns,y_pp,y_p,y,xi)
@@ -79,24 +85,63 @@ def SolveStability():
 		
 		## determine s and y 
 		if N == 0:  ## Newton method in the first loop
-			lns += lns_p*dxi
+			lns   += lns_p*dxi
+			lns_p += lns_pp*dxi
+	
+			############
+			## adapt dxi
+			############
+			## tolerance
+			toler = 0.003
+			## at dxi/2. forward
+			lns_12   = lns_arr[-1]  +  lns_p*(dxi/2.)
+			lns_p_12 = lnsp_arr[-1] + lns_pp*(dxi/2.)
+			## at dxi
+			lns_      = lns_12 + lns_p_12*(dxi/2.)
+			lns_pp_12 = gal.lnspp(lns_p_12,lns_12,ins.y_pp(xi+dxi/2.),ins.y_p(xi+dxi/2.),ins.y(xi+dxi/2.),xi+dxi/2.) 
+			lns_p_    = lns_p_12 + lns_pp_12*(dxi/2.)
+
+			## compare densities			
+			n1 = gal.n(lns,y)
+			n2 = gal.n(lns_,y)
+			n0 = gal.n(lns_arr[-1],y_arr[-1])
+			error = abs(n1-n2)/(n0*dxi)
+
+      ## suggested dxi
+			dxi_suggest = toler/error*dxi
+			## the smallest dxi 
+			if dxi_suggest < gal.xi(co.parsec*0.01):
+				dxi = gal.xi(co.parsec*0.01)
+			## the largest dxi
+			elif dxi_suggest > gal.xi(co.parsec):
+				dxi = gal.xi(co.parsec)
+			## if in the range, accept the suggested dxi
+			else:
+				dxi = dxi_suggest
+			print("new dxi: %g (pc)"%(dxi/gal.xi(co.parsec)))
+
+			############
+			## end adapt
+			############
+
 		else: ## Verlet method
 			lns = -lns_arr[-2] + 2.*lns + lns_pp*dxi**2
+			lns_p = lnsp_arr[-2] + 2.*lns_pp*dxi
 		## for unrealistic temperature profiles temperature can turn negative
 		## break the loop and inform the user
 		if y < 0.:
 			print ("***\n***\nNegative temperature. Breaking ...\n***\n***")
 			raise(Exception("Negative temperature. Unacceptable solution"))
 			break
-		## determine first derivative of s
-		if N == 0:  ## Newton method in the first loop
-			lns_p += lns_pp*dxi
-		else: ## Verlet method
-			lns_p = lnsp_arr[-2] + 2.*lns_pp*dxi
+
 		## determine xi
 		xi  += dxi   
 		## mass at radius r in SI units using M = M + dM
 		M   += 4.*np.pi*(gal.r(xi))**2*gal.m*gal.n(lns,y)*gal.r(dxi)
+			
+		v02_vr2 +=2.*co.G*M*gal.r(dxi)/(gal.r(xi))**2
+		temphi  += gal.r(xi)*gal.m*gal.n(lns,y)*gal.r(dxi)
+		
 				
 		## break the loop and inform the user if derivative of density is infinite  
 		if gal.n_p(lns_p,lns,y_p,y) == np.inf:
@@ -125,6 +170,8 @@ def SolveStability():
 		rhop_arr.append(gal.m*gal.n_p(lns_p,lns,y_p,y))
 		P_arr.append(gal.P(lns,y))
 		M_arr.append(M)
+		v02_vr2_arr.append(v02_vr2)
+		temphi_arr.append(temphi)
 
 		try:
 			if N%1000 == 0 and N>0:
@@ -155,12 +202,13 @@ def SolveStability():
 	rho_arr   = np.array(rho_arr)
 	P_arr     = np.array(P_arr)
 	M_arr     = np.array(M_arr)	
+	v02_vr2_arr = np.array(v02_vr2_arr)
+	temphi_arr  = np.array(temphi_arr)
 
-	
 	
 	
 	## return the containers
 	return lns_arr, lnsp_arr, lnspp_arr,\
            y_arr, yp_arr, ypp_arr,\
 		   r_arr, rho_arr, P_arr,\
-		   M_arr
+		   M_arr, v02_vr2_arr, temphi_arr

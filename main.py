@@ -12,11 +12,30 @@ from Stability import *
 lns_arr, lnsp_arr, lnspp_arr,\
 y_arr, yp_arr, ypp_arr,\
 r_arr, rho_arr, P_arr,\
-M_arr = SolveStability()
+M_arr, v02_vr2_arr, temphi_arr  = SolveStability()
 
 
 ## dr in SI units
 dr = r_arr[1]-r_arr[0]
+
+## Gravity Potential Energy
+U_g  = -4.*np.pi*co.G*dr*sum(M_arr*rho_arr*r_arr)
+## Kinetic energy d(U_k) = 3./2.*P*dV
+U_k  = 3./2.*4.*np.pi*dr*sum(r_arr**2*P_arr)
+
+
+## gravitational potential
+phi0  = -4.*np.pi*co.G*dr*sum(rho_arr*r_arr)
+phi_minus_phi0_arr = -co.G*M_arr/r_arr + 4.*np.pi*co.G*temphi_arr
+phi_arr = phi_minus_phi0_arr + phi0
+print ("Gravitational Potential Energy (U_g): %1.1e\nAverage Kinetic Energy (U_k): %1.1e"%(U_g,U_k))
+
+## free falling velocity starting at rest from the edge
+v02   = v02_vr2_arr[-1]
+v_arr = np.sqrt(v02 - v02_vr2_arr)
+v_    = v_arr[0:-1]## exclude v(R) which is zero
+t_freefall = dr*sum(1/v_)
+print ("dynamical time: %1.1e (yr)"%(t_freefall/(365.*24.*60.*60.)))
 
 
 ###################

@@ -32,3 +32,6 @@ k = 1.4e-23
 G = 6.7e-11
 # neutrino mass
 m = 1.8e-36
+
+## critical mass density in the universe
+rho_c = 9.e-27 ## kg.m^{-3}

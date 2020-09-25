@@ -30,3 +30,34 @@ def f(nu,z):
 	
 	
 	
+## pickle the partial degenerate values to speed up the code
+#N = 0
+#dz = 0.001
+#z  = 0.01
+#z_arr   = []
+#f52_arr = []
+#f32_arr = []
+#f12_arr = []
+#while z <= np.exp(10.):
+#	if z > 0.1:
+#		dz = 0.1
+#	z_arr.append(z)
+#	f52_arr.append(f(5./2.,z))
+#	f32_arr.append(f(3./2.,z))
+#	f12_arr.append(f(1./2.,z))
+#	z += dz
+#	if N%10000 == 0:
+#		print("z: %1.2e"%(z))
+#	N+=1
+	
+	
+import pickle
+## write a file
+#with open("FermiDirac.pickle", "wb") as fil:
+#	pickle.dump([np.array(z_arr),np.array(f52_arr),np.array(f32_arr),np.array(f12_arr)], fil)
+#
+
+#with open("FermiDirac.pickle", "rb") as fil:
+#z_arr,f52_arr,f32_arr,f12_arr = pickle.load(fil)
+	
+	
