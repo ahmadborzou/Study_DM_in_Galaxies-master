@@ -66,8 +66,8 @@ mu_arr = co.k*ins.T0*y_arr*(gal.lnz0+lns_arr)
 ## plot
 fig, axs = plt.subplots(1,5, figsize=[16, 4])
 ax = axs[0]
-ax.plot(r_arr_kpc,rho_arr,linewidth=2,color='black',label='numeric')
-ax.set_ylabel(r'$ \rho \quad\left( \mathrm{kg}\cdot\mathrm{m}^{-3} \right) $', fontdict=font)
+ax.plot(r_arr_kpc,rho_arr/co.rho_c,linewidth=2,color='black',label='numeric')
+ax.set_ylabel(r'$ \rho \quad\left( \rho_{\mathrm{c}} \right) $', fontdict=font)
 ax.set_xlabel(r'$ \mathrm{r} \quad \left( \mathrm{kpc} \right) $', fontdict=font)
 ax.set_yscale('log')
 ax = axs[1]
